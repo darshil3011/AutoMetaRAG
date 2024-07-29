@@ -7,3 +7,10 @@ This repository presents a Automatic Metadata based Retriever-Augmented Generato
 Following the schema suggestion, the framework automates the extraction of metadata for each data chunk according to the defined schemas and stores these, along with the data vectors, into the VectorDB Qdrant. This storage method enhances the efficiency and accuracy of data retrieval processes.
 
 On the inference side, the framework extracts metadata from incoming user queries based on the pre-determined schemas. It utilizes this metadata to perform targeted searches within the vector database, ensuring that the retrieved data chunks are the most relevant to the user's request. This method significantly improves the precision and speed of data retrieval, making it particularly useful for applications requiring rapid access to specific data segments within a large dataset
+
+
+## Steps to Run the notebook:
+
+1. Add information about data and list probable questions that may be asked based on this data in config.ini
+2. Put all data in one folder ('data/')
+3. Run the notebook. Replace openai_key, Qdrant_cloud_URL and Qdrant_access_token
