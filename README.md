@@ -1,16 +1,170 @@
 # AutoMetaRAG
 
-![Diagram](https://github.com/darshil3011/AutoMetaRAG/blob/main/autometaRAG.png)
+Automatic Metadata-based Retrieval Augmented Generation framework for optimized document retrieval using hybrid search (semantic + metadata filtering).
 
-This repository presents a Automatic Metadata based Retriever-Augmented Generator (AutoMeta RAG) framework designed to optimize the retrieval of data chunks from a large dataset by leveraging dynamic metadata schemas. The framework initiates by analyzing the dataset and anticipated user queries to suggest two types of metadata schemas: file-level and chunk-level. File-level metadata remains constant across all data chunks within a single file, providing a macro-view of the data attributes. Conversely, chunk-level metadata is unique for each data chunk, allowing for fine-grained indexing and retrieval.
+## Features
 
-Following the schema suggestion, the framework automates the extraction of metadata for each data chunk according to the defined schemas and stores these, along with the data vectors, into the VectorDB Qdrant. This storage method enhances the efficiency and accuracy of data retrieval processes.
+- **LLM-Powered Metadata Extraction**: Automatically extracts structured metadata from documents
+- **Hybrid Search**: Combines semantic similarity search with metadata filtering
+- **Qdrant Vector Database**: Efficient vector storage and retrieval
+- **Configurable Pipeline**: Easy configuration through environment variables
 
-On the inference side, the framework extracts metadata from incoming user queries based on the pre-determined schemas. It utilizes this metadata to perform targeted searches within the vector database, ensuring that the retrieved data chunks are the most relevant to the user's request. This method significantly improves the precision and speed of data retrieval, making it particularly useful for applications requiring rapid access to specific data segments within a large dataset
+## Installation
 
+1. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
 
-## Steps to Run the notebook:
+2. Set up environment variables using `.env` file:
+```bash
+# Copy the example file
+cp env.example .env
 
-1. Add information about data and list probable questions that may be asked based on this data in config.ini
-2. Put all data in one folder ('data/')
-3. Run the notebook. Replace openai_key, Qdrant_cloud_URL and Qdrant_access_token
+# Edit .env with your actual credentials
+```
+
+Your `.env` file should contain:
+```bash
+OPENAI_API_KEY=sk-your-openai-api-key
+QDRANT_URL=https://your-cluster.qdrant.io
+QDRANT_API_KEY=your-qdrant-api-key
+
+# Optional
+QDRANT_COLLECTION=AutoMetaRAG  # default: AutoMetaRAG
+DATA_DIR=./data                # default: ./data
+```
+
+3. Configure metadata settings in `config.ini`:
+```ini
+[Metadata]
+probable_questions = "Your example questions"
+document_info = "Description of your dataset"
+```
+
+## Usage
+
+### 1. Ingestion Pipeline
+
+Process documents, extract metadata, and create vector database:
+
+```bash
+python AutoMetaRAG.py --mode ingest
+```
+
+Optional arguments:
+```bash
+python AutoMetaRAG.py --mode ingest --config custom.ini --data-dir ./my_docs
+```
+
+**Available CLI Arguments:**
+
+| Argument | Mode | Type | Default | Description |
+|----------|------|------|---------|-------------|
+| `--mode` | Both | Required | - | `ingest` or `query` |
+| `--config` | Both | Optional | `config.ini` | Path to config file |
+| `--data-dir` | ingest | Optional | `./data` | Data directory path |
+| `--query` | query | Optional | - | Query string (if not provided, enters interactive mode) |
+| `--score-threshold` | query | Optional | `0.3` | Minimum relevance score (0.0-1.0) |
+| `--vector-name` | query | Optional | `""` | Vector name for multi-vector search |
+
+### 2. Query Pipeline
+
+**Option A: Single query (direct)**
+```bash
+python AutoMetaRAG.py --mode query --query "What is this paper about?"
+```
+
+**With custom score threshold:**
+```bash
+python AutoMetaRAG.py --mode query --query "Your question" --score-threshold 0.5
+```
+
+**With multi-vector approach:**
+```bash
+python AutoMetaRAG.py --mode query --query "Your question" --vector-name my_vector
+```
+
+**Option B: Interactive session**
+```bash
+python AutoMetaRAG.py --mode query
+```
+Then enter your questions interactively. Type 'exit' to quit.
+
+**Interactive with custom threshold:**
+```bash
+python AutoMetaRAG.py --mode query --score-threshold 0.5
+```
+
+## Configuration
+
+### Environment Variables (.env file)
+
+AutoMetaRAG uses `python-dotenv` to load environment variables from a `.env` file.
+
+**Required variables:**
+- `OPENAI_API_KEY`: Your OpenAI API key
+- `QDRANT_URL`: Qdrant server URL (e.g., https://your-cluster.qdrant.io)
+- `QDRANT_API_KEY`: Qdrant API key
+
+**Optional variables:**
+- `QDRANT_COLLECTION`: Collection name (default: "AutoMetaRAG")
+- `DATA_DIR`: Directory containing documents (default: "./data")
+
+**Setup:**
+1. Copy `env.example` to `.env`
+2. Fill in your actual credentials
+3. The `.env` file is automatically loaded when running AutoMetaRAG
+
+### config.ini File
+
+The `config.ini` file contains metadata configuration for schema generation:
+
+```ini
+[Metadata]
+probable_questions = "Question 1?", "Question 2?", "Question 3?"
+document_info = "Description of your dataset"
+```
+
+## Project Structure
+
+```
+.
+├── AutoMetaRAG.py       # Main Python script
+├── requirements.txt     # Python dependencies
+├── config.ini          # Metadata configuration
+├── env.example         # Environment variables template
+├── .env                # Your environment variables (create from env.example)
+├── data/               # Directory for input documents
+└── data.json           # Extracted metadata (auto-generated)
+```
+
+## How It Works
+
+1. **Environment Setup**: Loads API keys and configuration from `.env` file using python-dotenv
+2. **Metadata Schema Generation**: LLM analyzes your data and suggests metadata schemas
+3. **Document Processing**: Documents are loaded and metadata is extracted using LLM
+4. **Vector Database Creation**: Documents are embedded and stored in Qdrant with metadata
+5. **Query Processing**: User queries are analyzed to extract metadata filters
+6. **Hybrid Search**: Uses Qdrant's `query_points` method with:
+   - Semantic similarity search
+   - Metadata filtering
+   - Score threshold filtering (minimum relevance score: 0.3)
+   - Multi-vector support (optional)
+7. **Response Generation**: LLM generates answers from retrieved context
+
+## Example
+
+```python
+from AutoMetaRAG import AutoMetaRAGPipeline
+
+# Initialize pipeline
+pipeline = AutoMetaRAGPipeline('config.ini')
+
+# Run ingestion
+pipeline.run_indexing_pipeline()
+
+# Query
+answer = pipeline.query("What did the paper discuss about transformers?")
+print(answer)
+```
