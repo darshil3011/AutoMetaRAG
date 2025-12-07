@@ -18,7 +18,13 @@ class AutoMetaRAGConfig:
         
         Args:
             config_path: Path to configuration file
+            
+        Raises:
+            FileNotFoundError: If config file does not exist
         """
+        if not os.path.exists(config_path):
+            raise FileNotFoundError(f"Configuration file not found: {config_path}")
+        
         self.config = ConfigParser()
         self.config.read(config_path)
         

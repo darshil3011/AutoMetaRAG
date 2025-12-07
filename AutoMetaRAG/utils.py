@@ -10,7 +10,7 @@ from typing import Dict, List, Optional
 
 def extract_json(text: str) -> List[Dict]:
     """
-    Extract JSON objects from a text string using regex.
+    Extract JSON objects from a text string, handling nested JSON.
     
     Args:
         text: Input text containing JSON objects
@@ -18,16 +18,40 @@ def extract_json(text: str) -> List[Dict]:
     Returns:
         List of parsed JSON objects
     """
-    json_pattern = r'\{[^{}]*\}'
-    matches = re.findall(json_pattern, text)
-    
     json_objects = []
-    for match in matches:
-        try:
-            json_object = json.loads(match)
-            json_objects.append(json_object)
-        except json.JSONDecodeError:
-            continue  # Skip invalid JSON
+    
+    # Find all potential JSON objects by matching braces
+    # This handles nested JSON by counting braces
+    i = 0
+    while i < len(text):
+        if text[i] == '{':
+            # Found start of potential JSON object
+            brace_count = 0
+            start = i
+            
+            # Find matching closing brace
+            for j in range(i, len(text)):
+                if text[j] == '{':
+                    brace_count += 1
+                elif text[j] == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        # Found complete JSON object
+                        potential_json = text[start:j+1]
+                        try:
+                            json_object = json.loads(potential_json)
+                            json_objects.append(json_object)
+                            i = j + 1
+                            break
+                        except json.JSONDecodeError:
+                            # Not valid JSON, continue searching
+                            i += 1
+                            break
+            else:
+                # No matching brace found
+                i += 1
+        else:
+            i += 1
     
     return json_objects
 

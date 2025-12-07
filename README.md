@@ -49,12 +49,12 @@ document_info = "Description of your dataset"
 Process documents, extract metadata, and create vector database:
 
 ```bash
-python AutoMetaRAG.py --mode ingest
+python -m AutoMetaRAG --mode ingest
 ```
 
 Optional arguments:
 ```bash
-python AutoMetaRAG.py --mode ingest --config custom.ini --data-dir ./my_docs
+python -m AutoMetaRAG --mode ingest --config custom.ini --data-dir ./my_docs
 ```
 
 **Available CLI Arguments:**
@@ -72,28 +72,28 @@ python AutoMetaRAG.py --mode ingest --config custom.ini --data-dir ./my_docs
 
 **Option A: Single query (direct)**
 ```bash
-python AutoMetaRAG.py --mode query --query "What is this paper about?"
+python -m AutoMetaRAG --mode query --query "What is this paper about?"
 ```
 
 **With custom score threshold:**
 ```bash
-python AutoMetaRAG.py --mode query --query "Your question" --score-threshold 0.5
+python -m AutoMetaRAG --mode query --query "Your question" --score-threshold 0.5
 ```
 
 **With multi-vector approach:**
 ```bash
-python AutoMetaRAG.py --mode query --query "Your question" --vector-name my_vector
+python -m AutoMetaRAG --mode query --query "Your question" --vector-name my_vector
 ```
 
 **Option B: Interactive session**
 ```bash
-python AutoMetaRAG.py --mode query
+python -m AutoMetaRAG --mode query
 ```
 Then enter your questions interactively. Type 'exit' to quit.
 
 **Interactive with custom threshold:**
 ```bash
-python AutoMetaRAG.py --mode query --score-threshold 0.5
+python -m AutoMetaRAG --mode query --score-threshold 0.5
 ```
 
 ## Configuration
@@ -130,13 +130,23 @@ document_info = "Description of your dataset"
 
 ```
 .
-├── AutoMetaRAG.py       # Main Python script
-├── requirements.txt     # Python dependencies
-├── config.ini          # Metadata configuration
+├── AutoMetaRAG/        # Main package directory
+│   ├── __init__.py
+│   ├── __main__.py     # CLI entry point
+│   ├── pipeline.py     # Main pipeline class
+│   ├── config.py       # Configuration management
+│   ├── metadata.py     # Metadata generation/extraction
+│   ├── document.py     # Document processing
+│   ├── indexer.py      # Qdrant indexing
+│   ├── query.py        # Query engine
+│   └── utils.py         # Utility functions
+├── examples/           # Example scripts
+│   ├── test1.py        # Query example
+│   └── test2.py        # Ingestion example
+├── requirements.txt    # Python dependencies
 ├── env.example         # Environment variables template
-├── .env                # Your environment variables (create from env.example)
-├── data/               # Directory for input documents
-└── data.json           # Extracted metadata (auto-generated)
+├── README.md           # This file
+└── USAGE.md            # Detailed usage guide
 ```
 
 ## How It Works
