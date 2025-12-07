@@ -14,16 +14,11 @@ pipeline = AutoMetaRAGPipeline(
     unique_metadata_values_file='metadata/unique_metadata_values.json'  # Optional: custom unique values path
 )
 
-# Step 1: Generate metadata schema
-print("Generating metadata schema...")
+
 schema_path = pipeline.get_metadata_schema(
     schema_output_path='metadata/metadata_schema.json'  # Optional: override default
 )
-print(f"Schema saved to: {schema_path}")
 
-# (Optional: Modify metadata/metadata_schema.json if needed)
-# Step 2: Run indexing with schema
-print("\nStarting ingestion...")
 pipeline.run_indexing_pipeline(
     schema='metadata/metadata_schema.json',  # or None to auto-load
     data_dir='../sample_data/medical_data',  # optional override
@@ -31,4 +26,3 @@ pipeline.run_indexing_pipeline(
     metadata_cache_file='metadata/data.json',  # Optional: custom cache file path
     unique_metadata_values_file='metadata/unique_metadata_values.json'  # Optional: custom unique values path
 )
-print("Ingestion complete!")
